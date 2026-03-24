@@ -21,6 +21,36 @@ function criarUsuario(nome, idade) {
     nome,
     idade,
   };
+  
+  function criarUsuario(req, res) {
+    const { nome, idade } = req.body;
+
+    // Validação do nome
+    if (!nome || nome.trim() === "") {
+        return res.status(400).json({ erro: "Nome não pode ser vazio" });
+    }
+
+    if (nome.length < 3) {
+        return res.status(400).json({ erro: "Nome deve ter no mínimo 3 caracteres" });
+    }
+
+    // Validação da idade
+    if (idade < 0) {
+        return res.status(400).json({ erro: "Idade não pode ser negativa" });
+    }
+
+    if (idade > 120) {
+        return res.status(400).json({ erro: "Idade não pode ser maior que 120" });
+    }
+
+    // Se passou em todas as validações
+    const usuario = {
+        nome,
+        idade
+    };
+
+    return res.status(201).json(usuario);
+}
 
   usuarios.push(novoUsuario);
 
