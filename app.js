@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 
-const usuariosRoutes = require("./routes/usuarios");
+const usuariosRoutes = require("./routes/usuarios.js");
 
 app.use(express.json());
 app.use(express.static('public'));
