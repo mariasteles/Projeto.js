@@ -7,12 +7,10 @@ form.addEventListener("submit", async function (event) {
 
   const nome = document.getElementById("nome").value;
   const idade = document.getElementById("idade").value;
-  const email = document.getElementById("email").value;
 
   const usuario = {
     nome,
-    idade: Number(idade),
-    email
+    idade: Number(idade)
   };
 
   try {

@@ -1,91 +1,77 @@
 const pool = require("../database/db");
 
-let usuarios = [];
-let proximoId = 1;
+async function listarUsuarios() {
 
-function listarUsuarios() {
-  return usuarios;
+    const resultado = await pool.query(
+        "SELECT * FROM usuarios ORDER BY id"
+    );
+
+    return resultado.rows;
+
 }
 
-function buscarUsuarioPorId(id) {
-  return usuarios.find((u) => u.id === id);
+async function buscarUsuarioPorId(id) {
+
+    const resultado = await pool.query(
+        "SELECT * FROM usuarios WHERE id = $1",
+        [id]
+    );
+
+    return resultado.rows[0];
+
 }
 
-function criarUsuario(nome, idade) {
-  if (!nome || nome.trim() === "") {
-    throw new Error("Nome é obrigatório");
-  }
+async function criarUsuario(nome, idade) {
 
-  const novoUsuario = {
-    id: proximoId++,
-    nome,
-    idade,
-  };
-  
-  function criarUsuario(req, res) {
-    const { nome, idade } = req.body;
-
-    // Validação do nome
     if (!nome || nome.trim() === "") {
-        return res.status(400).json({ erro: "Nome não pode ser vazio" });
+        throw new Error("Nome é obrigatório");
     }
 
-    if (nome.length < 3) {
-        return res.status(400).json({ erro: "Nome deve ter no mínimo 3 caracteres" });
-    }
+    const resultado = await pool.query(
+        `
+        INSERT INTO usuarios (nome, idade)
+        VALUES ($1, $2)
+        RETURNING *
+        `,
+        [nome, idade]
+    );
 
-    // Validação da idade
-    if (idade < 0) {
-        return res.status(400).json({ erro: "Idade não pode ser negativa" });
-    }
+    return resultado.rows[0];
 
-    if (idade > 120) {
-        return res.status(400).json({ erro: "Idade não pode ser maior que 120" });
-    }
-
-    // Se passou em todas as validações
-    const usuario = {
-        nome,
-        idade
-    };
-
-    return res.status(201).json(usuario);
 }
 
-  usuarios.push(novoUsuario);
+async function atualizarUsuario(id, nome, idade) {
 
-  return novoUsuario;
+    const resultado = await pool.query(
+        `
+        UPDATE usuarios
+        SET nome = COALESCE($1, nome),
+            idade = COALESCE($2, idade)
+        WHERE id = $3
+        RETURNING *
+        `,
+        [nome, idade, id]
+    );
+
+    return resultado.rows[0];
+
 }
 
-function atualizarUsuario(id, nome, idade) {
-  const usuario = usuarios.find((u) => u.id === id);
+async function deletarUsuario(id) {
 
-  if (!usuario) {
-    return null;
-  }
+    const resultado = await pool.query(
+        "DELETE FROM usuarios WHERE id = $1",
+        [id]
+    );
 
-  usuario.nome = nome ?? usuario.nome;
-  usuario.idade = idade ?? usuario.idade;
+    return resultado.rowCount > 0;
 
-  return usuario;
-}
-
-function deletarUsuario(id) {
-  const index = usuarios.findIndex((u) => u.id === id);
-
-  if (index === -1) {
-    return false;
-  }
-
-  usuarios.splice(index, 1);
-
-  return true;
 }
 
 module.exports = {
-  listarUsuarios,
-  buscarUsuarioPorId,
-  criarUsuario,
-  atualizarUsuario,
-  deletarUsuario,
+    listarUsuarios,
+    buscarUsuarioPorId,
+    criarUsuario,
+    atualizarUsuario,
+    deletarUsuario
 };

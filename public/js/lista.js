@@ -29,8 +29,9 @@ async function carregarUsuarios() {
     console.error(erro);
 
   }
+}
 
-  function renderizarUsuarios(usuarios) {
+function renderizarUsuarios(usuarios) {
 
     lista.innerHTML = "";
   
@@ -43,14 +44,14 @@ async function carregarUsuarios() {
   
       const li = document.createElement("li");
   
-      li.textContent = `${usuario.nome} - ${usuario.idade} anos ${usuario.email}`;
+      li.textContent = `${usuario.nome} - ${usuario.idade} anos`;
   
       lista.appendChild(li);
   
     });
+
+    
   
   }
-
-}
 
 carregarUsuarios();

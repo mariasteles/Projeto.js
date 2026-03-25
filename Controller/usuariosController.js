@@ -1,95 +1,96 @@
-let usuarios = [];
-let proximoId = 1;
+const usuariosService = require("../services/usuariosService");
 
-function listarUsuarios(req, res) {
+async function listarUsuarios(req, res) {
+    const usuarios = await usuariosService.listarUsuarios();
 
-    res.status(200).json(usuarios);
-
+  res.json(usuarios);
 }
 
-function buscarUsuario(req, res) {
+async function buscarUsuario(req, res) {
+  const id = Number(req.params.id);
 
-    const id = Number(req.params.id);
+  const usuario = await usuariosService.buscarUsuarioPorId(id);
 
-    const usuario = usuarios.find(u => u.id === id);
+  if (!usuario) {
+    return res.status(404).json({
+      erro: "Usuário não encontrado",
+    });
+  }
 
-    if (!usuario) {
-        return res.status(404).json({
-            erro: "Usuário não encontrado"
-        });
-    }
-
-    res.json(usuario);
-
+  res.json(usuario);
 }
 
-function criarUsuario(req, res) {
-
+async function criarUsuario(req, res) {
+  try {
     const { nome, idade } = req.body;
 
-    if (!nome || nome.trim() === "") {
-        return res.status(400).json({
-            erro: "Nome é obrigatório"
-        });
+    if (!nome){
+      return res.status(400).json ({
+      });
     }
 
-    const novoUsuario = {
-        id: proximoId++,
-        nome,
-        idade
-    };
+    else if (nome.length < 3){
+      return res.status(400).json ({
+      });
+    }
 
-    usuarios.push(novoUsuario);
+    if (idade <=-1){
+      return res.status(400).json ({
+      });
+    }
+
+    else if (idade >=120){
+      return res.status(400).json ({
+      });
+    }
+
+
+    const usuario = await usuariosService.criarUsuario(nome, idade);
 
     res.status(201).json({
-        mensagem: "Usuário criado com sucesso",
-        usuario: novoUsuario
+      mensagem: "Usuário criado com sucesso",
+      usuario,
     });
-
+  } catch (erro) {
+    res.status(400).json({
+      erro: erro.message,
+    });
+  }
 }
 
-function atualizarUsuario(req, res) {
+async function atualizarUsuario(req, res) {
+  const id = Number(req.params.id);
+  const { nome, idade } = req.body;
 
-    const id = Number(req.params.id);
-    const { nome, idade } = req.body;
+  const usuario = await usuariosService.atualizarUsuario(id, nome, idade);
 
-    const usuario = usuarios.find(u => u.id === id);
+  if (!usuario) {
+    return res.status(404).json({
+      erro: "Usuário não encontrado",
+    });
+  }
 
-    if (!usuario) {
-        return res.status(404).json({
-            erro: "Usuário não encontrado"
-        });
-    }
-
-    usuario.nome = nome ?? usuario.nome;
-    usuario.idade = idade ?? usuario.idade;
-
-    res.json(usuario);
-
+  res.json(usuario);
 }
 
-function deletarUsuario(req, res) {
+async function deletarUsuario(req, res) {
+  const id = Number(req.params.id);
 
-    const id = Number(req.params.id);
+  const removido = await usuariosService.deletarUsuario(id);
 
-    const index = usuarios.findIndex(u => u.id === id);
+  if (!removido) {
+    return res.status(404).json({
+      erro: "Usuário não encontrado",
+    });
+  }
 
-    if (index === -1) {
-        return res.status(404).json({
-            erro: "Usuário não encontrado"
-        });
-    }
-
-    usuarios.splice(index, 1);
-
-    res.status(204).send();
-
+  res.status(204).send();
 }
 
 module.exports = {
-    listarUsuarios,
-    buscarUsuario,
-    criarUsuario,
-    atualizarUsuario,
-    deletarUsuario
+  listarUsuarios,
+  buscarUsuario,
+  criarUsuario,
+  atualizarUsuario,
+  deletarUsuario,
 };
